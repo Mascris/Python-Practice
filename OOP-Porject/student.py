@@ -10,17 +10,15 @@ class Student:
     def __init__(self, name: str, student_id: str):
         self.name = name
         self.student_id = student_id
-        self.subjects = []    # list of Subject objects
+        self.subjects = []    
 
     def add_grade(self, subject_name, grade_value):
-        # check if subject exists
         for subject in self.subjects:
             if subject.name == subject_name:
                 subject.grade = grade_value
                 print(f"Updated grade for {subject_name} to {grade_value}")
                 return
 
-        # otherwise add a new subject
         new_subject = Subject(subject_name, grade_value)
         self.subjects.append(new_subject)
         print(f"Added {subject_name} with grade {grade_value}")
@@ -38,7 +36,7 @@ class Student:
 
 class GradeBook:
     def __init__(self):
-        self.students = {}  # <---- FIXED
+        self.students = {}
 
     def add_student(self, name, student_id):
         if student_id in self.students:
