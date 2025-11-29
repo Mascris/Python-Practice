@@ -5,12 +5,18 @@ class Product:
         self.price = price
         self.stock_quantity = stock_quantity
 
-    """def add_stock(self,amount):
-        if 
+    def add_stock(self,amount: int):
+        if amount <=0:
+            print("the amount must be positive")
+            return
+        self.stock_quantity += amount
 
     def remove_stock(self,amount):
+        if amount <=0:
+            print("the amount must be positive")
+            return
+        self.stock_quantity -= amount
 
-        """
     def display_product_info(self):
         print(f"id:{self.product_id}, name:{self.name}, price:{self.price}, stock quantity:{self.stock_quantity}.")
 
@@ -28,8 +34,28 @@ class InventoryManager:
     def find_product(self,product_id):
         return self.products.get(product_id,None)
 
-    #def update_stock(self,product_id,amount_change):
+    def update_stock(self,product_id,amount_change):
+        product = self.products.get(product_id)
+        
+        if not product:
+            print("product not found")
+            return
+        if amount_change > 0:
+            product.add_stock(amount_change)
+            print(f"added {amount_change} units to {product.name}. new stock is {product.stock_quantity}.")
 
+        elif amount_change < 0:
+            amount_to_remove = abs(amount_change)
+
+            if amount_to_remove > product.stock_quantity:
+                print("not enough stock to widthdraw.")
+                return
+
+            product.remove_stock(amount_to_remove)
+            print("removed successfully.")
+            
+        else:
+            print("nothing to update amount to change cannot be 0.")
     def list_all_products(self):
         if not self.products:
             print("the store is empty!")
