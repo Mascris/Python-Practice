@@ -5,11 +5,7 @@ class Task:
         self.is_completed = is_completed
 
     def mark_as_completed(self):
-        answer = input("is task completed (yes/no):")
-        if answer == "yes":
-            self.is_completed = True
-        else:
-            self.is_completed = False
+        self.is_completed = True
 
     def display_task(self):
         status = "✔ Completed" if self.is_completed else "⏳ Pending"
@@ -71,8 +67,7 @@ if __name__ == "__main__":
             manager.view_pending_task()
 
         elif choice == "4":
-            desc = input("task description to complete:")
-            manager.mark_as_completed(desc)
+            manager.mark_as_completed()
 
         elif choice=="5":
             desc = input("task description to delete:")

@@ -45,7 +45,7 @@ class AnimalShelter:
         self.animals = []
 
     def add_animal(self,animal_obj):
-        self.animals[animal_obj.name] = animal_obj
+        self.animals.append(animal_obj)
         print(f"{animal_obj.name} added to shelter.")
     
     def admit_animal(self,animal):
