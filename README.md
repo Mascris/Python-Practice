@@ -50,28 +50,7 @@ class DatabaseManager:
 
     Libraries: pymssql, random, datetime
 
-🚀 How to Run
-
-    Clone the repository:
-    code Bash
-
-    
-git clone https://github.com/Mascris/Python-Portfolio.git
-
-  
-
-(Note: If you haven't renamed the repo yet, use Python-Practice.git instead)
-
-Navigate to a module (e.g., the RPG Store):
-code Bash
-
-        
-    cd 02_OOP_Systems/rpg-store
-    python main.py
-
-      
 
 <p align="center">
-<b>Constantly refactoring and improving code quality.</b>
+<b>🚀Constantly refactoring and improving code quality.</b>
 </p>
-```
