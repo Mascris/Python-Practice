@@ -1,3 +1,4 @@
+    
 # 🐍 Python Development Portfolio
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
@@ -6,16 +7,16 @@
 
 > A structured collection of Python backend systems, focusing on Object-Oriented Programming (OOP) and SQL Database integration.
 
-## 📂 Project Modules
+## 📂 Project Structure
 
-This repository showcases my ability to build modular, scalable Python applications.
+This repository is organized into modules based on complexity and concept:
 
-| Category | Module | Description |
+| Folder | Contents | Description |
 | :--- | :--- | :--- |
-| **⚔️ OOP Systems** | `rpg-store` | A virtual item shop using classes, inheritance, and inventory management. |
-| **🗄️ Databases** | `shop-sql` | A full CRUD application integrating Python with MSSQL/SQLite. |
-| **🧩 Algorithms** | `randomness` | Logic puzzles and probability simulations to sharpen problem-solving skills. |
-| **🏗️ Architecture** | `OOP-Project` | Demonstration of SOLID principles and class structures in Python. |
+| **📂 01_Basic_Scripts** | `randomness` | Logic puzzles, probability simulations, and algorithms. |
+| **📂 02_OOP_Systems** | `rpg-store`, `OOP-Project` | Virtual shop systems using classes, inheritance, and SOLID principles. |
+| **📂 03_Database_SQL** | `shop-sql`, `py-mssql` | Full CRUD applications integrating Python with MSSQL & SQLite. |
+| **🧪 Prototypes** | `idea` | Experimental scripts and scratchpad code for testing new concepts. |
 
 ## 💻 Code Showcase: SQL Integration
 
@@ -36,3 +37,41 @@ class DatabaseManager:
         
     def close(self):
         self.conn.close()
+
+  
+
+🛠️ Tech Stack
+
+    Languages: Python 3.10+
+
+    Databases: MSSQL, SQLite
+
+    Concepts: OOP, CRUD Operations, API Logic
+
+    Libraries: pymssql, random, datetime
+
+🚀 How to Run
+
+    Clone the repository:
+    code Bash
+
+    
+git clone https://github.com/Mascris/Python-Portfolio.git
+
+  
+
+(Note: If you haven't renamed the repo yet, use Python-Practice.git instead)
+
+Navigate to a module (e.g., the RPG Store):
+code Bash
+
+        
+    cd 02_OOP_Systems/rpg-store
+    python main.py
+
+      
+
+<p align="center">
+<b>Constantly refactoring and improving code quality.</b>
+</p>
+```
