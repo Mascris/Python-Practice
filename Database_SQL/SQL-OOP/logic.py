@@ -83,4 +83,13 @@ class MovieManager:
         except Exception as e:
             print(f"ERROR: Listing movies by this title {e}.")
 
+
+class RentalSystem:
+    def __init__(self) -> None:
+        pass
+    
+    def rent_movie(self,user_email,movie_title):
+        user_email.find_user_by_email()
+        movie_title.list_movie_by_title()
+
                             
