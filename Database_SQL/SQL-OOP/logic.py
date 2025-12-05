@@ -23,10 +23,13 @@ class UserManager:
                     sql = "SELECT name, email from users where email = %s"
                     cursor.execute(sql, (email,))
                     row = cursor.fetchone()
+                    if not row:
+                        print("movie not found")
+                        return None
 
                     if row:
                         return User(row[0],row[1],row[2])
-                    return None
+
         except Exception as e:
             print(f"ERROR: finding user: {e}.")
             return None
@@ -42,13 +45,14 @@ class MovieManager:
                     cursor.execute("SELECT title from movies where title = %s",(title,))
                     if cursor.fetchone():
                         print(f"this Movie title: {title} is already exist")
-                   
+                        return None
+
                     sql = "insert into movies (title,genre,daily_price,stock) values (%s,%s,%s,%s)"
                     cursor.execute(sql,(title,genre,daily_price,stock))
-                    conn.commit()
                     row = cursor.fetchone()
+                    conn.commit()
                     if row:
-                        return Movie(row[0],row[1],row[2],row[3],row[4])
+                        return Movie(0,row[1],row[2],row[3],row[4])
 
         except Exception as e:
             print(f"ERROR: adding movie {e}.")
@@ -63,7 +67,7 @@ class MovieManager:
                     row = cursor.fetchall()
 
                     if row:
-                        return User(row[0],row[1],row[2],row[3],row[4])
+                        return User(row[1],row[2],row[3],row[4])
                     return None
 
         except Exception as e:
@@ -77,9 +81,12 @@ class MovieManager:
                     cursor.execute(sql,(title,))
                     row = cursor.fetchone()
                     
+                    if not row:
+                        print("email not found!")
+                        return None
+
                     if row :
-                        return Movie(row[0],row[1],row[2],row[3],row[4])
-                    return None
+                        return Movie(0,row[0],row[1],row[2],row[3])
         except Exception as e:
             print(f"ERROR: Listing movies by this title {e}.")
 
@@ -92,4 +99,8 @@ class RentalSystem:
         user_email.find_user_by_email()
         movie_title.list_movie_by_title()
 
+        today = datetime.date.today()
+        due_date = today + datetime.timedelta(days=7)
+
+        current_stock = row[4]
                             
