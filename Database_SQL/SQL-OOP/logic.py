@@ -20,7 +20,7 @@ class UserManager:
         try:
             with connect() as conn:
                 with conn.cursor() as cursor:
-                    sql = "SELECT name, email from users where email = %s"
+                    sql = "SELECT user_id, name, email from users where email = %s"
                     cursor.execute(sql, (email,))
                     row = cursor.fetchone()
                     if not row:
@@ -28,7 +28,7 @@ class UserManager:
                         return None
 
                     if row:
-                        return User(row[0], row[1])
+                        return User(row[0], row[1],row[2])
 
         except Exception as e:
             print(f"ERROR: finding user: {e}.")
@@ -62,7 +62,7 @@ class MovieManager:
         try:
             with connect() as conn:
                 with conn.cursor() as cursor:
-                    sql = "SELECT title,genre,daily_price,stock from movies"
+                    sql = "SELECT movie_id, title, genre, daily_price, stock from movies"
                     cursor.execute(sql,)
                     row = cursor.fetchall()
 
@@ -96,24 +96,40 @@ class RentalSystem:
         pass
     
     def rent_movie(self,user_email,movie_title):
-        user_email = self.find_user_by_email()
-        movie_title = self.list_movie_by_title()
+        user_tool = UserManager()
+        movie_tool = MovieManager()
+
+        user = user_tool.find_user_by_email(user_email)
+        movie = movie_tool.list_movie_by_title(movie_title)
 
         today = datetime.date.today()
         due_date = today + datetime.timedelta(days=7)
 
-        if not email:
-            print(f"this {user_email} doesnt exist")
+
+        if not user:
+            print(f"this {user_email} doesnt exist.")
             return 
     
         if not movie:
-            print(f"this {movie_title} doesnt exist")
+            print(f"this {movie_title} not found.")
             return
+
+        if movie.stock >= 1:
+            print(f"{movie_title} is currently out of stock!")
+            return
+
         try:
              with connect() as conn:
                  with conn.cursor() as cursor:
-                     sql = "INSERT INTO rentals (user_id,movie_id,rental_date,due_date,return_date) VALUES (%s,%s,%s,%s)"
-                     cursor.execute(sql,(email,movie,today,due_date,))
+                    sql_rent = "INSERT INTO rentals (user_id,movie_id,rental_date,due_date,return_date) VALUES (%s, %s, %s, %s)"
+                    cursor.execute(sql_rent, (user.user_id, movie.movie_id, today, due_date))
+                    
+                    sql_update = "UPDATE movies SET stock = stock -1 where movie_id = %s"
+                    cursor.execute(sql_update, (movie.movie_id,))
+                    
+                    conn.commit()
+                    print("you've been added successfuly")
+
         except Exception as e:
             print(f"ERROR: {e}")
 
