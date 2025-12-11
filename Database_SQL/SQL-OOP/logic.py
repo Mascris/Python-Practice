@@ -134,5 +134,57 @@ class RentalSystem:
             print(f"ERROR: {e}")
 
     def return_movie(self,user_email,movie_title):
+
+        user_tool = UserManager()
+        movie_tool = MovieManager()
     
-                            
+        user = user_tool.find_user_by_email(user_email)
+        movie = movie_tool.list_movie_by_title(movie_title)
+
+        today = datetime.date.today()
+
+        if not user:
+            print(f"this user: {user_email} doesnt exist!")
+            return
+
+        if not movie:
+            print(f"this movie: {movie_title} is not found!")
+            return
+
+        try:
+            with connect() as conn:
+                with conn.cursor() as cursor:
+                    sql = "SELECT rental_id FROM rentals where user_id = %s AND movie_id = %s AND return_date IS NULL"
+                    cursor.execute(sql, (user.user_id, movie.movie_id))
+
+                    row = cursor.fetchone()
+
+                    if not row:
+                        print(f"This user does not currently have this movie: '{movie_title}' rented.")
+                        return
+                    
+                    rental = row[0]
+                    print(f"the active rental ID: {rental}")
+
+                    sql_update = "UPDATE rentals SET return_date = %s WHERE rental_id = %s"
+                    cursor.execute(sql_update, (today, rental))
+
+                    sql_add = "UPDATE movies SET stock = stock + 1 WHERE movie_id = %s"
+                    cursor.execute(sql_add,(movie.movie_id))
+
+                    conn.commit()
+
+                    print(f"Success! '{movie_title}' has been returned on {today}.")
+        except Exception as e:
+            print(f"ERROR: {e}.")
+    
+    def view_user_history(self,user_email):
+        try:
+            print("f")
+
+        except Exception as e:
+            print(f"ERROR: {e}.")
+
+
+
+
