@@ -32,7 +32,7 @@ class UserManager:
                         return None
 
                     if row:
-                        return User(row[0], row[1],row[2])
+                        return User(row[0], row[1], row[2])
 
         except Exception as e:
             print(f"ERROR: finding user: {e}.")
@@ -58,7 +58,7 @@ class MovieManager:
                     conn.commit()
 
                     if row:
-                        return Movie(0,row[1],row[2],row[3],row[4])
+                        return Movie(row[0],row[1],row[2],row[3],row[4])
 
         except Exception as e:
             print(f"ERROR: adding movie {e}.")
@@ -139,7 +139,7 @@ class RentalSystem:
                     cursor.execute(sql_update, (movie.movie_id,))
                     
                     conn.commit()
-                    print("you've been added successfuly")
+                    print(f"Successfully rented '{movie_title}'!")
 
         except Exception as e:
             print(f"ERROR: {e}")
@@ -202,7 +202,7 @@ class RentalSystem:
             with connect() as conn:
                 with conn.cursor() as cursor:
                     sql = "SELECT m.title, r.rental_date, r.due_date, r.return_date FROM movies m INNER JOIN rentals r ON m.movie_id = r.movie_id  WHERE r.user_id = %s"
-                    cursor.execute(sql,(user.user_id))
+                    cursor.execute(sql,(user.user_id,))
                     rows = cursor.fetchall()
 
                     if not rows:
