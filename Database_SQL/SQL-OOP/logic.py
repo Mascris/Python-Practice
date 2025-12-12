@@ -5,6 +5,7 @@ from tabulate import tabulate
 
 class UserManager:
     def __init__(self) -> None:
+
         pass
 
     def add_user(self,name: str,email: str):
@@ -13,6 +14,8 @@ class UserManager:
                 with conn.cursor() as cursor:
                     cursor.execute("insert into users(name,email)values(%s,%s)",(name,email))
                     conn.commit()
+                    print(f"User '{name}' added.")
+
         except Exception as e:
             print(f"ERROR: adding User {e}.")
 
@@ -23,6 +26,7 @@ class UserManager:
                     sql = "SELECT user_id, name, email from users where email = %s"
                     cursor.execute(sql, (email,))
                     row = cursor.fetchone()
+
                     if not row:
                         print("movie not found")
                         return None
@@ -36,6 +40,7 @@ class UserManager:
 
 class MovieManager:
     def __init__(self) -> None:
+
         pass
 
     def add_movie(self,title: str,genre: str,daily_price: float,stock:int):
@@ -47,10 +52,11 @@ class MovieManager:
                         print(f"this Movie title: {title} is already exist")
                         return None
 
-                    sql = "insert into movies (title,genre,daily_price,stock) values (%s,%s,%s,%s)"
+                    sql = "insert into movies (title,genre,daily_price,stock) OUTPUT INSERTED.movie_id, INSERTED.title, INSERTED.genre, INSERTED.daily_price, INSERTED.stock VALUES (%s, %s, %s, %s)"
                     cursor.execute(sql,(title,genre,daily_price,stock))
                     row = cursor.fetchone()
                     conn.commit()
+
                     if row:
                         return Movie(0,row[1],row[2],row[3],row[4])
 
@@ -64,11 +70,14 @@ class MovieManager:
                 with conn.cursor() as cursor:
                     sql = "SELECT movie_id, title, genre, daily_price, stock from movies"
                     cursor.execute(sql,)
-                    row = cursor.fetchall()
+                    rows = cursor.fetchall()
 
-                    if row:
-                        return User(row[0],row[1],row[2],row[3],row[4])
-                    return None
+                if rows:
+                    print("\n--- ALL Movies ---")
+                    headers = ["ID", "Title", "Genre", "Price", "Stock"]
+                    print(tabulate(rows, headers=headers, tablefmt="psql"))
+                else:
+                    print("No Movies found!")
 
         except Exception as e:
             print(f"ERROR: Listing movies {e}.")
@@ -77,7 +86,7 @@ class MovieManager:
         try:
             with connect() as conn:
                 with conn.cursor() as cursor:
-                    sql = "SELECT title,genre,daily_price,stock from movies where title = %s"
+                    sql = "SELECT movie_id,title,genre,daily_price,stock from movies where title = %s"
                     cursor.execute(sql,(title,))
                     row = cursor.fetchone()
                     
@@ -87,12 +96,14 @@ class MovieManager:
 
                     if row :
                         return Movie(row[0],row[1],row[2],row[3],row[4])
+
         except Exception as e:
             print(f"ERROR: Listing movies by this title {e}.")
 
 
 class RentalSystem:
     def __init__(self) -> None:
+
         pass
     
     def rent_movie(self,user_email,movie_title):
@@ -114,17 +125,17 @@ class RentalSystem:
             print(f"this {movie_title} not found.")
             return
 
-        if movie.stock >= 1:
+        if movie.stock <= 0:
             print(f"{movie_title} is currently out of stock!")
             return
 
         try:
              with connect() as conn:
                  with conn.cursor() as cursor:
-                    sql_rent = "INSERT INTO rentals (user_id,movie_id,rental_date,due_date,return_date) VALUES (%s, %s, %s, %s)"
+                    sql_rent = "INSERT INTO rentals (user_id,movie_id,rental_date,due_date) VALUES (%s, %s, %s, %s)"
                     cursor.execute(sql_rent, (user.user_id, movie.movie_id, today, due_date))
                     
-                    sql_update = "UPDATE movies SET stock = stock -1 where movie_id = %s"
+                    sql_update = "UPDATE movies SET stock = stock - 1 where movie_id = %s"
                     cursor.execute(sql_update, (movie.movie_id,))
                     
                     conn.commit()
@@ -164,27 +175,46 @@ class RentalSystem:
                         return
                     
                     rental = row[0]
-                    print(f"the active rental ID: {rental}")
+                    #print(f"the active rental ID: {rental}")
 
                     sql_update = "UPDATE rentals SET return_date = %s WHERE rental_id = %s"
                     cursor.execute(sql_update, (today, rental))
 
                     sql_add = "UPDATE movies SET stock = stock + 1 WHERE movie_id = %s"
-                    cursor.execute(sql_add,(movie.movie_id))
+                    cursor.execute(sql_add,(movie.movie_id,))
 
                     conn.commit()
 
                     print(f"Success! '{movie_title}' has been returned on {today}.")
+
         except Exception as e:
             print(f"ERROR: {e}.")
     
     def view_user_history(self,user_email):
-        try:
-            print("f")
+        user_tool = UserManager()
+        user = user_tool.find_user_by_email(user_email)
 
+        if not user:
+            print("User Not Found.")
+            return
+
+        try:
+            with connect() as conn:
+                with conn.cursor() as cursor:
+                    sql = "SELECT m.title, r.rental_date, r.due_date, r.return_date FROM movies m INNER JOIN rentals r ON m.movie_id = r.movie_id  WHERE r.user_id = %s"
+                    cursor.execute(sql,(user.user_id))
+                    rows = cursor.fetchall()
+
+                    if not rows:
+                        print(f"this User '{user_email}' doesnt have any history.")
+                        return
+
+                    print(f"\n--- History for {user_email} ---")
+                    headers = ["Movie", "Rented On", "Due Date", "Returned On"]
+                    print(tabulate(rows, headers=headers, tablefmt="psql"))
+
+                    
         except Exception as e:
             print(f"ERROR: {e}.")
-
-
 
 
