@@ -68,13 +68,13 @@ class MovieManager:
         try:
             with connect() as conn:
                 with conn.cursor() as cursor:
-                    sql = "SELECT movie_id, title, genre, daily_price, stock from movies"
+                    sql = "SELECT title, genre, daily_price, stock from movies"
                     cursor.execute(sql,)
                     rows = cursor.fetchall()
 
                 if rows:
                     print("\n--- ALL Movies ---")
-                    headers = ["ID", "Title", "Genre", "Price", "Stock"]
+                    headers = ["Title", "Genre", "Price", "Stock"]
                     print(tabulate(rows, headers=headers, tablefmt="psql"))
                 else:
                     print("No Movies found!")
