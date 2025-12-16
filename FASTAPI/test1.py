@@ -1,12 +1,20 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 
 app = FastAPI()
 
-@app.get("/hello/{name}")
-def hello(name: str):
-    return {"message": f"Hello,{name}."}
+class Item(BaseModel):
+    name: str
+    price: float
+    is_offer: bool = None
 
-@app.get("/square/{number}")
-def square(number: int):
-    result = number * number
-    return {f"the square of {number} is {result}."}
+@app.post("/items/create")
+def create_item(item: Item):
+    total_cost = item.price * 1.20
+
+    return{
+        "item_name": item.name,
+        "original_price": item.price,
+        "price_with_tax": total_cost,
+        "is_offer": item.is_offer
+    }
