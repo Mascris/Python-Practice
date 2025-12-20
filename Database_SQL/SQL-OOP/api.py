@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from logic import UserManager, MovieManager, RentalSystem
 
 app = FastAPI()
@@ -19,6 +19,21 @@ class MovieForm(BaseModel):
     daily_price: float
     stock: int
 
+    @field_validator('daily_price')
+    @classmethod
+    def check_price(cls, v: float) -> float:
+        if v <= 0:
+            raise ValueError('Price must be Positive')
+        return v
+    
+    @field_validator('stock')
+    @classmethod
+    def check_stock(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError('Stock cannont be Negative')
+        return v
+    
+
 class RentalForm(BaseModel):
     user_email: str
     movie_title: str
@@ -36,7 +51,7 @@ def add_users(form: UserForm):
     result = user_manager.add_user(form.name, form.email, form.password)
     return result
 
-@app.get("login")
+@app.post("/login")
 def user_login(form: LoginForm):
     return user_manager.login_user(form.email, form.password)
 

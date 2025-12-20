@@ -1,3 +1,5 @@
+from errors import UserNotFoundError, MovieOutOfStockError, MovieNotFoundError
+from auth import TokenManager
 import bcrypt
 from db import connect
 from models import User, Movie, Rental
@@ -60,14 +62,23 @@ class UserManager:
 
                     input_bytes = password.encode('utf-8')
                     hash_bytes = db_hash_str.encode('utf-8')
+                    
+                    if bcrypt.checkpw(input_bytes, hash_bytes):
 
-                    is_correct = bcrypt.checkpw(input_bytes, hash_bytes)
+                        auth = TokenManager()
 
-                    if is_correct:
-                        return {"message": f"Welcome back {db_name}!"}
+                        access_token = auth.create_token(db_id, email)
+
+                        return {
+                        "message": f"welcome back, {db_name}",
+                        "access_token": access_token,
+                        "token_type": "bearer",
+                        "status": "success"
+                    }
+
                     else:
-                        return {"Error": "Invalid email or password"}
-        
+                        return {"message": "Invalid email or password"}
+
         except Exception as e:
             return {"Error": str(e), "status":"error"}
 
@@ -152,28 +163,25 @@ class RentalSystem:
         due_date = today + datetime.timedelta(days=7)
 
         if not user:
-            return {"error": f"User {user_email} doesn't exist.", "status": "error"}
-    
+            raise UserNotFoundError(f"User {user_email} doesn't exist")
+
         if not movie:
-            return {"error": f"Movie '{movie_title}' not found.", "status": "error"}
+            raise MovieNotFoundError(f"Movie '{movie_title}' not Found")
 
         if movie.stock <= 0:
-            return {"error": f"'{movie_title}' is out of stock!", "status": "error"}
+            raise MovieOutOfStockError(f"'{movie_title}' is out of stock")
 
-        try:
-             with connect() as conn:
-                 with conn.cursor() as cursor:
-                    sql_rent = "INSERT INTO rentals (user_id,movie_id,rental_date,due_date) VALUES (%s, %s, %s, %s)"
-                    cursor.execute(sql_rent, (user.user_id, movie.movie_id, today, due_date))
-                    
-                    sql_update = "UPDATE movies SET stock = stock - 1 where movie_id = %s"
-                    cursor.execute(sql_update, (movie.movie_id,))
-                    
-                    conn.commit()
-                    return {"message": f"Successfully rented '{movie_title}'!", "status": "success"}
-
-        except Exception as e:
-            return {"error": str(e), "status": "error"}
+        with connect() as conn:
+            with conn.cursor() as cursor:
+                sql_rent = "INSERT INTO rentals (user_id,movie_id,rental_date,due_date) VALUES (%s, %s, %s, %s)"
+                cursor.execute(sql_rent, (user.user_id, movie.movie_id, today, due_date))
+                
+                sql_update = "UPDATE movies SET stock = stock - 1 where movie_id = %s"
+                cursor.execute(sql_update, (movie.movie_id,))
+                
+                conn.commit()
+                
+                return {"message": f"Successfully rented '{movie_title}'!"}
 
     def return_movie(self, user_email, movie_title):
         user_tool = UserManager()
