@@ -106,12 +106,23 @@ class MovieManager:
             print(f"ERROR: adding movie {e}.")
             return {"error": str(e), "status": "error"}
 
-    def list_all_movies(self):
+    def list_all_movies(self, page: int = 1, limit: int = 10):
         try:
+            # 2. THE MATH: Calculate how many rows to skip
+            offset = (page - 1) * limit
+
             with connect() as conn:
                 with conn.cursor() as cursor:
-                    sql = "SELECT title, genre, daily_price, stock from movies"
-                    cursor.execute(sql)
+                    sql = """
+                    SELECT title, genre, daily_price, stock 
+                    FROM movies 
+                    ORDER BY movie_id 
+                    OFFSET %s ROWS 
+                    FETCH NEXT %s ROWS ONLY
+                    """
+                    
+                    # 4. Pass the calculated offset and the limit to the query
+                    cursor.execute(sql, (offset, limit))
                     rows = cursor.fetchall()
 
                     results = []
@@ -129,7 +140,6 @@ class MovieManager:
         except Exception as e:
             print(f"Error: {e}")
             return []
-
     def list_movie_by_title(self, title):
         try:
             with connect() as conn:
